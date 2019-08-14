@@ -1,2 +1,2 @@
-# vidstab_stitcher
-Experiment to use vidstab for panorama stitching without any directional assumptions.
+# stitcher
+Experiment to build a panorama stitcher without any directional assumptions.
