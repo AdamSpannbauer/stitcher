@@ -93,7 +93,7 @@ def im_join_reduce(image_list, display=False):
 if __name__ == '__main__':
     import imutils.paths
 
-    im_paths = list(imutils.paths.list_images('images'))
+    im_paths = list(imutils.paths.list_images('image_pieces'))
     im_list = [cv2.imread(p) for p in im_paths]
 
     montage = imutils.build_montages(im_list, image_shape=(100, 100), montage_shape=(3, 3))
