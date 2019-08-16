@@ -4,7 +4,7 @@ import random
 import cv2
 import imutils.paths
 import imutils
-from shard_photo import grid_shard
+from tile_image import tile_image
 from im_join_reduce import im_join_reduce
 import utils
 
@@ -22,7 +22,7 @@ else:
     image = cv2.imread(args['input'])
     image = imutils.resize(image, width=min([700, image.shape[1]]))
 
-    im_list = grid_shard(image, nrow=4, ncol=4, overlap=75)
+    im_list = tile_image(image, nrow=4, ncol=4, overlap=75)
     random.shuffle(im_list)
 
 input_montage = utils.image_montage(im_list, n_col=4)

@@ -1,10 +1,10 @@
-"""Script to go from image to 'shards'
+"""Script to go from image to tiles
 
 (just a cropping of image into smaller pieces to try and put back together)
 """
 
 
-def grid_shard(image, nrow=3, ncol=3, overlap=30):
+def tile_image(image, nrow=3, ncol=3, overlap=30):
     """Break an image into separate rect regions
     
     :param image: image to break-up
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     input_image = cv2.imread(args['input'])
     input_image_basename = os.path.basename(args['input'])
 
-    im_shards = grid_shard(input_image,
+    im_shards = tile_image(input_image,
                            args['nrow'],
                            args['ncol'],
                            args['overlap'])
