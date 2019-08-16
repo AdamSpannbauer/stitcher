@@ -6,12 +6,14 @@ Experiment to stitch images together without directional assumptions.  Takes a l
 
 ### Input
 
-<sub>*[`image_pieces`](image_pieces) is a directory containing images to be stitched*</sub>
 
 ```
 python stitch.py -i image_pieces
 ```
 
+<sub>*[`image_pieces`](image_pieces) is a directory containing images to be stitched*</sub>
+
+
 ### Output
 
-![](readme/example_reduction.gif)
+<img src='readme/example_reduction.gif' align='center' width='75%'>
