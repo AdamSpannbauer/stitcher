@@ -1,22 +1,24 @@
+import math
 import cv2
 import numpy as np
+import imutils
 
 
-def build_transformation_matrix(transform):
-    """Convert transform list to transformation matrix
-    :param transform: transform list as [dx, dy, da]
-    :return: transform matrix as 2d (2, 3) numpy array
-    """
-    transform_matrix = np.zeros((2, 3))
+def imshow_max_dim(winname, image, max_width=750):
+    h, w = image.shape[:2]
+    if w > max_width:
+        image = imutils.resize(image, width=max_width)
 
-    transform_matrix[0, 0] = np.cos(transform[2])
-    transform_matrix[0, 1] = -np.sin(transform[2])
-    transform_matrix[1, 0] = np.sin(transform[2])
-    transform_matrix[1, 1] = np.cos(transform[2])
-    transform_matrix[0, 2] = transform[0]
-    transform_matrix[1, 2] = transform[1]
+    cv2.imshow(winname, image)
 
-    return transform_matrix
+
+def image_montage(image_list, n_col, image_shape=(300, 300)):
+    n_col = min([len(image_list), n_col])
+    n_row = math.ceil(len(image_list) / n_col)
+
+    input_montage = imutils.build_montages(image_list, image_shape=image_shape, montage_shape=(n_col, n_row))
+
+    return input_montage[0]
 
 
 def pad_to_same_dim(im_a, im_b):
