@@ -13,7 +13,7 @@ A lot of the starting code in this repo was based on [@PyImageSearch](https://tw
 python stitch.py -i image_pieces
 ```
 
-<sub>**[`image_pieces`](image_pieces) is a directory containing images to be stitched*</sub>
+<sub>\**[`image_pieces`](image_pieces) is a directory containing images to be stitched*</sub>
 
 
 ### Output
@@ -26,4 +26,4 @@ python stitch.py -i image_pieces
 
 <img src='readme/example_progress.gif' align='center' width='75%'>
 
-<sub>**Funko Pop style picture provided by [@pofigster](https://twitter.com/pofigster)*</sub>
+<sub>\**Funko Pop style picture provided by [@pofigster](https://twitter.com/pofigster)*</sub>
