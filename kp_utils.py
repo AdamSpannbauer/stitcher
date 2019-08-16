@@ -33,8 +33,12 @@ def match_keypoints(kps_a, kps_b, features_a, features_b, ratio=0.75, reproj_thr
         pts_b = np.float32([kps_b[i] for (i, _) in matches])
 
         h_mat, status = cv2.findHomography(pts_a, pts_b, cv2.RANSAC, reproj_thresh)
+    else:
+        matches = []
+        h_mat = None
+        status = np.array([], dtype='uint8')
 
-        return matches, h_mat, status
+    return matches, h_mat, status
 
 
 def draw_matches(image_a, image_b, kps_a, kps_b, matches, status):
