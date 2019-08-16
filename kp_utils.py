@@ -9,7 +9,7 @@ MATCHER = kp_factory.DescriptorMatcher_create('BruteForce')
 
 
 def detect_and_describe(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
 
     kps = DETECTOR.detect(gray)
     kps, features = DESCRIPTOR.compute(image, kps)
@@ -45,7 +45,7 @@ def draw_matches(image_a, image_b, kps_a, kps_b, matches, status):
     h_a, w_a = image_a.shape[:2]
     h_b, w_b = image_b.shape[:2]
 
-    vis = np.zeros((max(h_a, h_b), w_a + w_b, 3), dtype="uint8")
+    vis = np.zeros((max(h_a, h_b), w_a + w_b, 4), dtype="uint8")
     vis[0:h_a, 0:w_a] = image_a
     vis[0:h_b, w_a:] = image_b
 
@@ -54,6 +54,6 @@ def draw_matches(image_a, image_b, kps_a, kps_b, matches, status):
             pt_a = (int(kps_a[a_i][0]), int(kps_a[a_i][1]))
             pt_b = (int(kps_b[b_i][0]) + w_a, int(kps_b[b_i][1]))
 
-            cv2.line(vis, pt_a, pt_b, (0, 255, 0), 1)
+            cv2.line(vis, pt_a, pt_b, (0, 255, 0, 0), 1)
 
     return vis
