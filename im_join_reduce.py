@@ -1,22 +1,29 @@
+import warnings
 import cv2
+import imutils
 import numpy as np
 import utils
 import kp_utils
 
 
+def safe_destroy_window(winname):
+    try:
+        cv2.destroyWindow(winname)
+    except cv2.error:
+        pass
+
+
 def join_ims(im_a, im_b, homography):
-    bgra_a = cv2.cvtColor(im_a, cv2.COLOR_BGR2BGRA)
-    bgra_b = cv2.cvtColor(im_b, cv2.COLOR_BGR2BGRA)
+    im_a, im_b = utils.pad_for_join(im_a, im_b)
+    h, w = im_a.shape[:2]
 
-    bgra_a, bgra_b = utils.pad_for_join(bgra_a, bgra_b)
-    h, w = bgra_a.shape[:2]
-    warped_bgra_a = cv2.warpPerspective(bgra_a,
-                                        homography,
-                                        (w, h),
-                                        borderMode=cv2.BORDER_CONSTANT,
-                                        borderValue=[0, 0, 0, 0])
+    warped_bgra_a = cv2.warpAffine(im_a,
+                                   homography[:2, :],
+                                   (w, h),
+                                   borderMode=cv2.BORDER_CONSTANT,
+                                   borderValue=[0, 0, 0, 0])
 
-    joined_im = utils.layer_overlay(bgra_b, warped_bgra_a)
+    joined_im = utils.layer_overlay(im_b, warped_bgra_a)
 
     roi_y, roi_x = np.where(joined_im[:, :, 3] == 255)
 
@@ -26,12 +33,11 @@ def join_ims(im_a, im_b, homography):
     y1 = max(roi_y)
 
     joined_im = joined_im[y0:y1, x0:x1]
-    joined_im = cv2.cvtColor(joined_im, cv2.COLOR_BGRA2BGR)
 
     return joined_im
 
 
-def join_best_match(image, kps, image_list, kp_list, display_matches=False):
+def join_best_match(image, kps, image_list, kp_list, min_kp, display_matches=False):
     best_match_im_b = None
     best_match_n = 0
     best_match_ind = None
@@ -56,14 +62,28 @@ def join_best_match(image, kps, image_list, kp_list, display_matches=False):
             best_match_ind = i
             best_homography = homography
 
-    if best_homography is not None:
+    if best_homography is not None and best_match_n >= min_kp:
         joined_im = join_ims(image, best_match_im_b, best_homography)
+    else:
+        best_match_ind = None
+
+    if best_match_n < min_kp:
+        min_kp_warning = f'Best match ({best_match_n}) did not meet min_kp threshold ({min_kp})'
+        warnings.warn(min_kp_warning)
 
     return best_match_ind, joined_im
 
 
-def im_join_reduce(image_list, display=False):
-    if len(image_list) == 1:
+# Should prolly be a class or somethin instead of just passing all these args for state
+def _im_join_reduce(image_list, display=False, min_kp=100, max_retry=2, retry_count=0, prev_len=None):
+    if prev_len is not None:
+        if prev_len == len(image_list):
+            retry_count += 1
+
+    prev_len = len(image_list)
+
+    if retry_count > max_retry or len(image_list) == 1:
+        safe_destroy_window("Progress")
         return image_list
 
     kp_feat_list = [kp_utils.detect_and_describe(im) for im in image_list]
@@ -74,29 +94,29 @@ def im_join_reduce(image_list, display=False):
     del image_list[0]
     del kp_feat_list[0]
 
-    best_match_i, joined_im = join_best_match(im_a, kps_a, image_list, kp_feat_list)
+    best_match_i, joined_im = join_best_match(im_a, kps_a, image_list, kp_feat_list, min_kp=min_kp)
 
-    if best_match_i is None:
-        return image_list
+    if best_match_i is None or joined_im is None:
+        image_list = image_list + [im_a]
+    else:
+        del image_list[best_match_i]
+        image_list = image_list + [joined_im]
 
     if display:
-        cv2.imshow('Join Progress', joined_im)
-        cv2.waitKey(0)
+        bgr_image_list = [cv2.cvtColor(im, cv2.COLOR_BGRA2BGR) for im in image_list]
+        progress_montage = utils.image_montage(bgr_image_list, n_col=4)
 
-    del image_list[best_match_i]
+        utils.imshow_max_dim('Progress', progress_montage, max_width=400)
+        cv2.waitKey(32)
 
-    image_list = [joined_im] + image_list
+    return _im_join_reduce(image_list, display=display,
+                           min_kp=min_kp, max_retry=max_retry,
+                           retry_count=retry_count, prev_len=prev_len)
 
-    return im_join_reduce(image_list, display=display)
 
+def im_join_reduce(image_list, display=False, min_kp=100):
+    bgra_image_list = [cv2.cvtColor(im, cv2.COLOR_BGR2BGRA) for im in image_list]
+    reduced_list = _im_join_reduce(bgra_image_list, display=display, min_kp=min_kp)
+    bgr_reduced_list = [cv2.cvtColor(im, cv2.COLOR_BGRA2BGR) for im in reduced_list]
 
-if __name__ == '__main__':
-    import imutils.paths
-
-    im_paths = list(imutils.paths.list_images('image_pieces'))
-    im_list = [cv2.imread(p) for p in im_paths]
-
-    montage = imutils.build_montages(im_list, image_shape=(100, 100), montage_shape=(3, 3))
-    cv2.imshow('Input Pieces', montage[0])
-
-    reduced_im_list = im_join_reduce(im_list, display=True)
+    return bgr_reduced_list
