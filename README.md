@@ -1,6 +1,6 @@
 # Stitcher
 
-Experiment to stitch images together without directional assumptions.  Takes a list of images as input and reduces list by iteratively stitching images together.  Process stops if images not deemed similiar enough (as deemed by an arbitrarily set keypoint match count).
+Experiment to stitch images together without directional assumptions.  Takes a list of images as input and reduces list by iteratively stitching images together.  Process stops if images not deemed similar enough (as deemed by an arbitrarily set keypoint match count).
 
 A lot of the starting code in this repo was based on [@PyImageSearch](https://twitter.com/PyImageSearch)'s tutorial, [OpenCV panorama stitching](https://www.pyimagesearch.com/2016/01/11/opencv-panorama-stitching/).
 
